@@ -1,0 +1,72 @@
+---
+title: "Wrangling1"
+author: "mikec964"
+date: "July 26, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(stringr)
+library(dplyr)
+```
+
+# Overview
+This is an exercise to import an Excel file and clean it up.
+0. Import the data
+1. Clean up brand names
+2. Separate product code and product number
+3. Add product categories
+4. Add full address for geocoding
+5. Create dummy variables for company and product category
+
+# Import data set
+This loads a CSV file. This could be improved by directly importing an Excel 
+xls file.
+
+```{r message=FALSE}
+products.orig <- read_csv("refine_original.csv")
+products.norm <- products.orig  # We'll clean up this version
+head(products.orig)
+```
+
+
+# Normalize company names
+To correct any problems in the company names in the data, I compared entered 
+names to a list of correct names. The entry with the most letters in common 
+(in any order) was deemed the most correct. Then I substituted the correct name
+for the name in the data.
+
+```{r message=FALSE}
+LettersInCommon <- function(str1, str2) {
+  c <- 0
+  for(i in 1:str_length(str1)) {
+    c <- c + str_count(str2, str_sub(str1, i, i))
+  }
+  return(c)
+}
+
+BestMatch <- function(str1, str.list) {
+  best.item <- 1
+  best.count <- 0
+  for(i in 1:length(str.list)) {
+    lic <- LettersInCommon(str1, str.list[i])
+    if(lic > best.count) {
+      best.item <- i
+      best.count <- lic
+    }
+  }
+  return(best.item)
+}
+
+real.names <- c("philips", "akzo", "van houten", "unilever")
+for(r in 1:dim(products.norm)[1]) {
+  products.norm[r, "company"] <- 
+    real.names[BestMatch(products.norm[r, "company"], real.names)]
+}
+
+head(products.norm)
+```
+
+
