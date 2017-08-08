@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(readr)
 library(stringr)
+library(tibble)
 ```
 
 # Overview
@@ -76,11 +77,14 @@ Create a column for product code and a separate column for the number, then remo
 
 ```{r message=FALSE}
 pid <- products.norm$`Product code / number`
-pcode <- as_tibble(str_split_fixed(pid, "-", 2)[,1])
-names(pcode) <- "product code"
-pnum <- as_tibble(str_split_fixed(pid, "-", 2)[,2])
-names(pnum) <- "product name"
-products.norm <- bind_cols(products.norm, pcode, pnum)
+products.norm <- add_column(products.norm, 
+                            str_split_fixed(pid, "-", 2)[,1],
+                            .after="company")
+names(products.norm)[2] <- "p.code"
+products.norm <- add_column(products.norm, 
+                            str_split_fixed(pid, "-", 2)[,2],
+                            .after="p.code")
+names(products.norm)[3] <- "p.number"
 products.norm$`Product code / number` <- NULL
 head(products.norm)
 ```
