@@ -90,3 +90,16 @@ head(products.norm)
 ```
 
 
+# Add product categories
+
+
+# Add full address for geocoding
+```{r}
+full.address <- paste0(products.norm$address, "; ",
+                       products.norm$city, "; ",
+                       products.norm$country)
+products.norm <- add_column(products.norm, full.address)
+```
+
+
+# Create dummy variables for company and product category
