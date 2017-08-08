@@ -1,19 +1,20 @@
 ---
 title: "Wrangling1"
 author: "mikec964"
-date: "July 26, 2017"
+date: "Aug 6, 2017"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
 library(readr)
 library(stringr)
-library(dplyr)
 ```
 
 # Overview
 This is an exercise to import an Excel file and clean it up.
+
 0. Import the data
 1. Clean up brand names
 2. Separate product code and product number
@@ -66,6 +67,21 @@ for(r in 1:dim(products.norm)[1]) {
     real.names[BestMatch(products.norm[r, "company"], real.names)]
 }
 
+head(products.norm)
+```
+
+
+# Separate product code and number
+Create a column for product code and a separate column for the number, then remove the original combined column.
+
+```{r message=FALSE}
+pid <- products.norm$`Product code / number`
+pcode <- as_tibble(str_split_fixed(pid, "-", 2)[,1])
+names(pcode) <- "product code"
+pnum <- as_tibble(str_split_fixed(pid, "-", 2)[,2])
+names(pnum) <- "product name"
+products.norm <- bind_cols(products.norm, pcode, pnum)
+products.norm$`Product code / number` <- NULL
 head(products.norm)
 ```
 

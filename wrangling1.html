@@ -11,7 +11,6 @@
 
 <meta name="author" content="mikec964" />
 
-<meta name="date" content="2017-07-26" />
 
 <title>Wrangling1</title>
 
@@ -119,7 +118,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Wrangling1</h1>
 <h4 class="author"><em>mikec964</em></h4>
-<h4 class="date"><em>July 26, 2017</em></h4>
+<h4 class="date"><em>Aug 6, 2017</em></h4>
 
 </div>
 
@@ -194,6 +193,28 @@ head(products.norm)</code></pre>
 ## 5 philips                    x-12 Groningensingel 151 arnhem
 ## 6 philips                    p-23 Groningensingel 152 arnhem
 ## # ... with 2 more variables: country &lt;chr&gt;, name &lt;chr&gt;</code></pre>
+</div>
+<div id="separate-product-code-and-number" class="section level1">
+<h1>Separate product code and number</h1>
+<p>Create a column for product code and a separate column for the number, then remove the original combined column.</p>
+<pre class="r"><code>pid &lt;- products.norm$`Product code / number`
+pcode &lt;- as_tibble(str_split_fixed(pid, &quot;-&quot;, 2)[,1])
+names(pcode) &lt;- &quot;product code&quot;
+pnum &lt;- as_tibble(str_split_fixed(pid, &quot;-&quot;, 2)[,2])
+names(pnum) &lt;- &quot;product name&quot;
+products.norm &lt;- bind_cols(products.norm, pcode, pnum)
+products.norm$`Product code / number` &lt;- NULL
+head(products.norm)</code></pre>
+<pre><code>## # A tibble: 6 x 7
+##   company             address   city         country            name
+##     &lt;chr&gt;               &lt;chr&gt;  &lt;chr&gt;           &lt;chr&gt;           &lt;chr&gt;
+## 1 philips Groningensingel 147 arnhem the netherlands   dhr p. jansen
+## 2 philips Groningensingel 148 arnhem the netherlands   dhr p. hansen
+## 3 philips Groningensingel 149 arnhem the netherlands   dhr j. Gansen
+## 4 philips Groningensingel 150 arnhem the netherlands   dhr p. mansen
+## 5 philips Groningensingel 151 arnhem the netherlands  dhr p. fransen
+## 6 philips Groningensingel 152 arnhem the netherlands dhr p. franssen
+## # ... with 2 more variables: `product code` &lt;chr&gt;, `product name` &lt;chr&gt;</code></pre>
 </div>
 
 
