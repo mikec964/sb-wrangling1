@@ -1,7 +1,7 @@
 ---
 title: "Wrangling1"
 author: "mikec964"
-date: "Aug 6, 2017"
+date: "Aug 9, 2017"
 output: html_document
 ---
 
@@ -23,6 +23,7 @@ This is an exercise to import an Excel file and clean it up.
 3. Add product categories
 4. Add full address for geocoding
 5. Create dummy variables for company and product category
+6. Save results as refine_clean.csv
 
 
 # Import data set
@@ -97,9 +98,9 @@ This uses the product code column as an index into a named vector to create a ne
 
 ```{r}
 category <- c("p" = "Smartphone",
-                        "v" = "TV",
-                        "x" = "Laptop",
-                        "q" = "Tablet")
+              "v" = "TV",
+              "x" = "Laptop",
+              "q" = "Tablet")
 products.norm <- add_column(products.norm, category[products.norm$code], 
                             .after="code")
 names(products.norm)[3] <- "category"
@@ -108,20 +109,28 @@ names(products.norm)[3] <- "category"
 
 # Add full address for geocoding
 ```{r}
-full.address <- paste(products.norm$address,
+# used underscore in var name so the col name would have an underscore,
+# and be consistent with the "dummy variable" columns we create next
+full_address <- paste(products.norm$address,
                        products.norm$city,
                        products.norm$country, sep=", ")
-products.norm <- add_column(products.norm, full.address)
+products.norm <- add_column(products.norm, full_address)
 ```
 
 
 # Create dummy variables for company and product category
 Create a column per company that is true if the row matches that company
 ```{r}
-cn <- sapply(real.names, function(x){ paste0("company_", x) })
-products.norm <- mutate(products.norm, company_philips = products.norm$company == "philips")
-products.norm <- mutate(products.norm, company_akzo = products.norm$company == "akzo")
-products.norm <- mutate(products.norm, `company_van houten` = products.norm$company == "van houten")
-products.norm <- mutate(products.norm, company_unilever = products.norm$company == "unilever")
+for(company1 in real.names) {
+  colx <- paste0("company_", company1)
+  products.norm <- mutate(products.norm, 
+                          colx = (products.norm$company == company1))
+  names(products.norm)[dim(products.norm)[2]] <- colx
+}
 ```
 
+
+# Save results as refine_clean.csv
+```{r}
+write_csv(products.norm, "refine_clean.csv")
+```

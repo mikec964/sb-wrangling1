@@ -118,7 +118,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Wrangling1</h1>
 <h4 class="author"><em>mikec964</em></h4>
-<h4 class="date"><em>Aug 6, 2017</em></h4>
+<h4 class="date"><em>Aug 9, 2017</em></h4>
 
 </div>
 
@@ -133,6 +133,7 @@ $(document).ready(function () {
 <li>Add product categories</li>
 <li>Add full address for geocoding</li>
 <li>Create dummy variables for company and product category</li>
+<li>Save results as refine_clean.csv</li>
 </ol>
 </div>
 <div id="import-data-set" class="section level1">
@@ -201,23 +202,57 @@ head(products.norm)</code></pre>
 products.norm &lt;- add_column(products.norm, 
                             str_split_fixed(pid, &quot;-&quot;, 2)[,1],
                             .after=&quot;company&quot;)
-names(products.norm)[2] &lt;- &quot;p.code&quot;
+names(products.norm)[2] &lt;- &quot;code&quot;
 products.norm &lt;- add_column(products.norm, 
                             str_split_fixed(pid, &quot;-&quot;, 2)[,2],
-                            .after=&quot;p.code&quot;)
-names(products.norm)[3] &lt;- &quot;p.number&quot;
+                            .after=&quot;code&quot;)
+names(products.norm)[3] &lt;- &quot;number&quot;
 products.norm$`Product code / number` &lt;- NULL
 head(products.norm)</code></pre>
 <pre><code>## # A tibble: 6 x 7
-##   company p.code p.number             address   city         country
-##     &lt;chr&gt;  &lt;chr&gt;    &lt;chr&gt;               &lt;chr&gt;  &lt;chr&gt;           &lt;chr&gt;
-## 1 philips      p        5 Groningensingel 147 arnhem the netherlands
-## 2 philips      p       43 Groningensingel 148 arnhem the netherlands
-## 3 philips      x        3 Groningensingel 149 arnhem the netherlands
-## 4 philips      x       34 Groningensingel 150 arnhem the netherlands
-## 5 philips      x       12 Groningensingel 151 arnhem the netherlands
-## 6 philips      p       23 Groningensingel 152 arnhem the netherlands
+##   company  code number             address   city         country
+##     &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;               &lt;chr&gt;  &lt;chr&gt;           &lt;chr&gt;
+## 1 philips     p      5 Groningensingel 147 arnhem the netherlands
+## 2 philips     p     43 Groningensingel 148 arnhem the netherlands
+## 3 philips     x      3 Groningensingel 149 arnhem the netherlands
+## 4 philips     x     34 Groningensingel 150 arnhem the netherlands
+## 5 philips     x     12 Groningensingel 151 arnhem the netherlands
+## 6 philips     p     23 Groningensingel 152 arnhem the netherlands
 ## # ... with 1 more variables: name &lt;chr&gt;</code></pre>
+</div>
+<div id="add-product-categories" class="section level1">
+<h1>Add product categories</h1>
+<p>This uses the product code column as an index into a named vector to create a new column with the product categories.</p>
+<pre class="r"><code>category &lt;- c(&quot;p&quot; = &quot;Smartphone&quot;,
+              &quot;v&quot; = &quot;TV&quot;,
+              &quot;x&quot; = &quot;Laptop&quot;,
+              &quot;q&quot; = &quot;Tablet&quot;)
+products.norm &lt;- add_column(products.norm, category[products.norm$code], 
+                            .after=&quot;code&quot;)
+names(products.norm)[3] &lt;- &quot;category&quot;</code></pre>
+</div>
+<div id="add-full-address-for-geocoding" class="section level1">
+<h1>Add full address for geocoding</h1>
+<pre class="r"><code># used underscore in var name so the col name would have an underscore,
+# and be consistent with the &quot;dummy variable&quot; columns we create next
+full_address &lt;- paste(products.norm$address,
+                       products.norm$city,
+                       products.norm$country, sep=&quot;, &quot;)
+products.norm &lt;- add_column(products.norm, full_address)</code></pre>
+</div>
+<div id="create-dummy-variables-for-company-and-product-category" class="section level1">
+<h1>Create dummy variables for company and product category</h1>
+<p>Create a column per company that is true if the row matches that company</p>
+<pre class="r"><code>for(company1 in real.names) {
+  colx &lt;- paste0(&quot;company_&quot;, company1)
+  products.norm &lt;- mutate(products.norm, 
+                          colx = (products.norm$company == company1))
+  names(products.norm)[dim(products.norm)[2]] &lt;- colx
+}</code></pre>
+</div>
+<div id="save-results-as-refine_clean.csv" class="section level1">
+<h1>Save results as refine_clean.csv</h1>
+<pre class="r"><code>write_csv(products.norm, &quot;refine_clean.csv&quot;)</code></pre>
 </div>
 
 
