@@ -82,11 +82,11 @@ pid <- products.norm$`Product code / number`
 products.norm <- add_column(products.norm, 
                             str_split_fixed(pid, "-", 2)[,1],
                             .after="company")
-names(products.norm)[2] <- "p.code"
+names(products.norm)[2] <- "code"
 products.norm <- add_column(products.norm, 
                             str_split_fixed(pid, "-", 2)[,2],
-                            .after="p.code")
-names(products.norm)[3] <- "p.number"
+                            .after="code")
+names(products.norm)[3] <- "number"
 products.norm$`Product code / number` <- NULL
 head(products.norm)
 ```
@@ -96,11 +96,13 @@ head(products.norm)
 This uses the product code column as an index into a named vector to create a new column with the product categories.
 
 ```{r}
-product.categories <- c("p" = "Smartphone",
+category <- c("p" = "Smartphone",
                         "v" = "TV",
                         "x" = "Laptop",
                         "q" = "Tablet")
-products.norm <- add_column(products.norm, product.categories[products.norm$p.code], .after="p.code")
+products.norm <- add_column(products.norm, category[products.norm$code], 
+                            .after="code")
+names(products.norm)[3] <- "category"
 ```
 
 
@@ -114,3 +116,12 @@ products.norm <- add_column(products.norm, full.address)
 
 
 # Create dummy variables for company and product category
+Create a column per company that is true if the row matches that company
+```{r}
+cn <- sapply(real.names, function(x){ paste0("company_", x) })
+products.norm <- mutate(products.norm, company_philips = products.norm$company == "philips")
+products.norm <- mutate(products.norm, company_akzo = products.norm$company == "akzo")
+products.norm <- mutate(products.norm, `company_van houten` = products.norm$company == "van houten")
+products.norm <- mutate(products.norm, company_unilever = products.norm$company == "unilever")
+```
+
