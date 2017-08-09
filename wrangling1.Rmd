@@ -104,6 +104,7 @@ category <- c("p" = "Smartphone",
 products.norm <- add_column(products.norm, category[products.norm$code], 
                             .after="code")
 names(products.norm)[3] <- "category"
+head(products.norm)
 ```
 
 
@@ -115,6 +116,7 @@ full_address <- paste(products.norm$address,
                        products.norm$city,
                        products.norm$country, sep=", ")
 products.norm <- add_column(products.norm, full_address)
+head(products.norm)
 ```
 
 
@@ -127,6 +129,7 @@ for(company1 in real.names) {
                           colx = (products.norm$company == company1))
   names(products.norm)[dim(products.norm)[2]] <- colx
 }
+head(products.norm)
 ```
 
 
@@ -134,3 +137,4 @@ for(company1 in real.names) {
 ```{r}
 write_csv(products.norm, "refine_clean.csv")
 ```
+
