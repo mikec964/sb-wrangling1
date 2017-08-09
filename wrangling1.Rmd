@@ -95,9 +95,9 @@ head(products.norm)
 
 # Add full address for geocoding
 ```{r}
-full.address <- paste0(products.norm$address, "; ",
-                       products.norm$city, "; ",
-                       products.norm$country)
+full.address <- paste(products.norm$address,
+                       products.norm$city,
+                       products.norm$country, sep=", ")
 products.norm <- add_column(products.norm, full.address)
 ```
 
