@@ -13,6 +13,7 @@ library(stringr)
 library(tibble)
 ```
 
+
 # Overview
 This is an exercise to import an Excel file and clean it up.
 
@@ -22,6 +23,7 @@ This is an exercise to import an Excel file and clean it up.
 3. Add product categories
 4. Add full address for geocoding
 5. Create dummy variables for company and product category
+
 
 # Import data set
 This loads a CSV file. This could be improved by directly importing an Excel 
@@ -91,6 +93,15 @@ head(products.norm)
 
 
 # Add product categories
+This uses the product code column as an index into a named vector to create a new column with the product categories.
+
+```{r}
+product.categories <- c("p" = "Smartphone",
+                        "v" = "TV",
+                        "x" = "Laptop",
+                        "q" = "Tablet")
+products.norm <- add_column(products.norm, product.categories[products.norm$p.code], .after="p.code")
+```
 
 
 # Add full address for geocoding
