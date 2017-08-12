@@ -156,33 +156,11 @@ head(products.orig)</code></pre>
 <div id="normalize-company-names" class="section level1">
 <h1>Normalize company names</h1>
 <p>To correct any problems in the company names in the data, I compared entered names to a list of correct names. The entry with the most letters in common (in any order) was deemed the most correct. Then I substituted the correct name for the name in the data.</p>
-<pre class="r"><code>LettersInCommon &lt;- function(str1, str2) {
-  c &lt;- 0
-  for(i in 1:str_length(str1)) {
-    c &lt;- c + str_count(str2, str_sub(str1, i, i))
-  }
-  return(c)
-}
-
-BestMatch &lt;- function(str1, str.list) {
-  best.item &lt;- 1
-  best.count &lt;- 0
-  for(i in 1:length(str.list)) {
-    lic &lt;- LettersInCommon(str1, str.list[i])
-    if(lic &gt; best.count) {
-      best.item &lt;- i
-      best.count &lt;- lic
-    }
-  }
-  return(best.item)
-}
-
-real.names &lt;- c(&quot;philips&quot;, &quot;akzo&quot;, &quot;van houten&quot;, &quot;unilever&quot;)
+<pre class="r"><code>real.names &lt;- c(&quot;philips&quot;, &quot;akzo&quot;, &quot;van houten&quot;, &quot;unilever&quot;)
 for(r in 1:dim(products.norm)[1]) {
   products.norm[r, &quot;company&quot;] &lt;- 
-    real.names[BestMatch(products.norm[r, &quot;company&quot;], real.names)]
+    real.names[which.min(adist(products.norm[r, &quot;company&quot;], real.names))]
 }
-
 head(products.norm)</code></pre>
 <pre><code>## # A tibble: 6 x 6
 ##   company `Product code / number`             address   city
@@ -229,7 +207,18 @@ head(products.norm)</code></pre>
               &quot;q&quot; = &quot;Tablet&quot;)
 products.norm &lt;- add_column(products.norm, category[products.norm$code], 
                             .after=&quot;code&quot;)
-names(products.norm)[3] &lt;- &quot;category&quot;</code></pre>
+names(products.norm)[3] &lt;- &quot;category&quot;
+head(products.norm)</code></pre>
+<pre><code>## # A tibble: 6 x 8
+##   company  code   category number             address   city
+##     &lt;chr&gt; &lt;chr&gt;      &lt;chr&gt;  &lt;chr&gt;               &lt;chr&gt;  &lt;chr&gt;
+## 1 philips     p Smartphone      5 Groningensingel 147 arnhem
+## 2 philips     p Smartphone     43 Groningensingel 148 arnhem
+## 3 philips     x     Laptop      3 Groningensingel 149 arnhem
+## 4 philips     x     Laptop     34 Groningensingel 150 arnhem
+## 5 philips     x     Laptop     12 Groningensingel 151 arnhem
+## 6 philips     p Smartphone     23 Groningensingel 152 arnhem
+## # ... with 2 more variables: country &lt;chr&gt;, name &lt;chr&gt;</code></pre>
 </div>
 <div id="add-full-address-for-geocoding" class="section level1">
 <h1>Add full address for geocoding</h1>
@@ -238,7 +227,18 @@ names(products.norm)[3] &lt;- &quot;category&quot;</code></pre>
 full_address &lt;- paste(products.norm$address,
                        products.norm$city,
                        products.norm$country, sep=&quot;, &quot;)
-products.norm &lt;- add_column(products.norm, full_address)</code></pre>
+products.norm &lt;- add_column(products.norm, full_address)
+head(products.norm)</code></pre>
+<pre><code>## # A tibble: 6 x 9
+##   company  code   category number             address   city
+##     &lt;chr&gt; &lt;chr&gt;      &lt;chr&gt;  &lt;chr&gt;               &lt;chr&gt;  &lt;chr&gt;
+## 1 philips     p Smartphone      5 Groningensingel 147 arnhem
+## 2 philips     p Smartphone     43 Groningensingel 148 arnhem
+## 3 philips     x     Laptop      3 Groningensingel 149 arnhem
+## 4 philips     x     Laptop     34 Groningensingel 150 arnhem
+## 5 philips     x     Laptop     12 Groningensingel 151 arnhem
+## 6 philips     p Smartphone     23 Groningensingel 152 arnhem
+## # ... with 3 more variables: country &lt;chr&gt;, name &lt;chr&gt;, full_address &lt;chr&gt;</code></pre>
 </div>
 <div id="create-dummy-variables-for-company-and-product-category" class="section level1">
 <h1>Create dummy variables for company and product category</h1>
@@ -248,7 +248,20 @@ products.norm &lt;- add_column(products.norm, full_address)</code></pre>
   products.norm &lt;- mutate(products.norm, 
                           colx = (products.norm$company == company1))
   names(products.norm)[dim(products.norm)[2]] &lt;- colx
-}</code></pre>
+}
+head(products.norm)</code></pre>
+<pre><code>## # A tibble: 6 x 13
+##   company  code   category number             address   city
+##     &lt;chr&gt; &lt;chr&gt;      &lt;chr&gt;  &lt;chr&gt;               &lt;chr&gt;  &lt;chr&gt;
+## 1 philips     p Smartphone      5 Groningensingel 147 arnhem
+## 2 philips     p Smartphone     43 Groningensingel 148 arnhem
+## 3 philips     x     Laptop      3 Groningensingel 149 arnhem
+## 4 philips     x     Laptop     34 Groningensingel 150 arnhem
+## 5 philips     x     Laptop     12 Groningensingel 151 arnhem
+## 6 philips     p Smartphone     23 Groningensingel 152 arnhem
+## # ... with 7 more variables: country &lt;chr&gt;, name &lt;chr&gt;,
+## #   full_address &lt;chr&gt;, company_philips &lt;lgl&gt;, company_akzo &lt;lgl&gt;,
+## #   `company_van houten` &lt;lgl&gt;, company_unilever &lt;lgl&gt;</code></pre>
 </div>
 <div id="save-results-as-refine_clean.csv" class="section level1">
 <h1>Save results as refine_clean.csv</h1>
